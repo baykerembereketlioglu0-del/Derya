@@ -1,0 +1,3 @@
+# Netlify ayarı: site docs/ klasöründen yayınlanır (derleme gerekmez)
+[build]
+  publish = "docs"
