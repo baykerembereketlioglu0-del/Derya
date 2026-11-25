@@ -10,6 +10,9 @@
   var NATIVE = typeof window.Android !== 'undefined';
   var DAY = 86400000;
   var REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var STANDALONE = navigator.standalone === true || !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  var NEEDS_INSTALL = !NATIVE && IOS && !STANDALONE;
 
   var AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   var AY_K = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
@@ -98,7 +101,7 @@
   function defaults() {
     return {
       v: 1, name: 'Derya', note: 'Bugün de çok güzelsin. Seni çok seviyorum 💗', theme: 'pembe',
-      cycleLen: 28, periodLen: 5, onboarded: false, ongoing: null, endedOn: null, days: {},
+      cycleLen: 28, periodLen: 5, onboarded: false, ongoing: null, endedOn: null, hideInstall: false, days: {},
       notif: { on: true, before: 2, time: '10:00', fertile: false }
     };
   }
@@ -336,6 +339,7 @@
   function setBars() {
     var th = THEMES[S.theme] || THEMES.pembe;
     try { if (NATIVE) Android.setBars(th.bar, th.light); } catch (e) {}
+    var meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute('content', th.bar);
   }
   function applyTheme(id, ev) {
     if (!THEMES[id]) return;
@@ -452,6 +456,19 @@
     if (R.todayMarked) return '<button class="btn btn-primary pulse" data-act="end">✨ Regl bitti</button>';
     return '<button class="btn btn-primary pulse" data-act="start">💧 Regl başladı</button>';
   }
+  function installCard() {
+    if (!NEEDS_INSTALL || S.hideInstall) return '';
+    return '<section class="card install anim" style="--i:1.5"><div class="card-title">📲 Uygulama gibi kullan <button class="x" data-act="hideInstall" aria-label="Kapat">✕</button></div>' +
+      '<p>Safari\'de <b>Paylaş</b> <span class="share-ic">' + SHARE_ICON + '</span> düğmesine, sonra <b>“Ana Ekrana Ekle”</b>ye dokun. İkonla, tam ekran ve internetsiz açılır.</p></section>';
+  }
+  function soonBanner(R) {
+    if (!R.has || R.inPeriod || R.late) return '';
+    var left = R.nextStart - R.t;
+    if (left > 3 || left < 0) return '';
+    var txt = left === 0 ? 'Regl bugün başlayabilir!' : 'Regl ' + (left === 1 ? 'yarın' : left + ' gün sonra') + ' başlayabilir!';
+    return '<section class="soon anim" style="--i:1.5"><span class="si">👜</span><div><b>' + txt + '</b><small>Çantana ped koymayı unutma 💕</small></div></section>';
+  }
+  var SHARE_ICON = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v7A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5H16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
   function weekStrip(R) {
     var h = '<div class="week anim" style="--i:1">';
     for (var n = R.t - 3; n <= R.t + 3; n++) {
@@ -507,7 +524,7 @@
       '<header class="hello anim" style="--i:0"><div><h1><span data-act="name">Merhaba ' + esc(S.name) + '</span> <span class="wave-hand">👋</span></h1>' +
       '<div class="date">' + p.d + ' ' + AYLAR[p.m] + ', ' + GUNLER[p.wd] + '</div></div>' +
       '<button class="icon-btn" data-act="themes" aria-label="Tema">🎨</button></header>' +
-      weekStrip(R) +
+      weekStrip(R) + installCard() + soonBanner(R) +
       '<section class="card ring-card anim" style="--i:2"><div class="ring-wrap">' + ringSvg(R) + ringCenter(R) + '</div>' +
       '<div class="phase-pill"><span class="dot"></span>' + pill + '</div><br>' + actionBtn(R) + '</section>' +
       infoCards(R) + moodCard(R) + tipCard(R) + loveCard() +
@@ -808,23 +825,26 @@
       '<div class="row"><div class="rl">Regl süresi<small>Kaç gün sürüyor</small></div>' + stepper('periodLen', S.periodLen) + '</div>' +
       '<p class="muted" style="font-size:12.5px;font-weight:700;margin-top:6px">Kayıtlar arttıkça uygulama kendi ortalamasını hesaplar; bu değerler sadece başlangıç içindir.</p></section>' +
 
-      '<section class="card anim" style="--i:4"><div class="card-title">🔔 Hatırlatmalar</div>' +
+      (!NATIVE ? '<section class="card anim" style="--i:4"><div class="card-title">🔔 Hatırlatmalar</div>' +
+        '<p class="muted" style="font-size:13px;font-weight:700;margin-top:8px">' + (IOS ? 'iPhone\'da' : 'Tarayıcıda') +
+        ' web uygulamaları zamanlanmış bildirim gönderemiyor. Regl yaklaşınca uygulamayı açtığında ana sayfada uyarı görürsün 👜💕</p></section>' : '') +
+      (!NATIVE ? '' : '<section class="card anim" style="--i:4"><div class="card-title">🔔 Hatırlatmalar</div>' +
       '<div class="row"><div class="rl">Bildirimler<small>Regl yaklaşınca haber ver</small></div><button class="switch ' + (n.on ? 'on' : '') + '" data-act="notifOn"></button></div>' +
       '<div id="notifMore" ' + (n.on ? '' : 'hidden') + '>' +
       '<div class="row"><div class="rl">Kaç gün önce?</div><div class="seg">' + [1, 2, 3].map(function (d) { return '<button class="' + (n.before === d ? 'on' : '') + '" data-act="before" data-d="' + d + '">' + d + ' gün</button>'; }).join('') + '</div></div>' +
       '<div class="row"><div class="rl">Saat</div><input type="time" class="input" data-field="time" value="' + esc(n.time) + '"></div>' +
       '<div class="row"><div class="rl">Doğurgan dönem<small>Başlangıcında hatırlat</small></div><button class="switch ' + (n.fertile ? 'on' : '') + '" data-act="notifFertile"></button></div>' +
       '<div class="row"><button class="btn btn-sm btn-ghost" data-act="testNotif">🔔 Deneme bildirimi gönder</button></div>' +
-      '</div></section>' +
+      '</div></section>') +
 
       '<section class="card anim" style="--i:5"><div class="card-title">💾 Yedek</div>' +
       '<p class="muted" style="font-size:12.5px;font-weight:700;margin-top:6px">Telefon değiştirirken ya da uygulamayı silmeden önce yedeği kendine gönder (WhatsApp, Drive, not…).</p>' +
       '<div class="btn-row"><button class="btn btn-sm btn-ghost" data-act="export">📤 Yedeği paylaş</button><button class="btn btn-sm btn-ghost" data-act="import">📥 Geri yükle</button></div>' +
       '<div class="btn-row" style="grid-template-columns:1fr"><button class="btn btn-sm btn-ghost" style="color:#ef4444" data-act="reset">🗑️ Tüm verileri sil</button></div></section>' +
 
-      '<section class="card anim" style="--i:6"><div class="about">🔒 Veriler sadece bu telefonda saklanır, uygulamanın internet izni yoktur.<br><br>' +
+      '<section class="card anim" style="--i:6"><div class="about">🔒 Veriler sadece bu telefonda saklanır, ' + (NATIVE ? 'uygulamanın internet izni yoktur.' : 'hiçbir sunucuya gönderilmez.') + '<br><br>' +
       'Tahminler ortalamalara dayanır ve tıbbi tavsiye değildir; doğum kontrolü yöntemi olarak kullanılmamalıdır.<br><br>' +
-      '<b>Sürüm 1.0</b> · Sevgiyle yapıldı <span class="heart-beat">💗</span></div></section>';
+      '<b>Sürüm 1.1</b> · Sevgiyle yapıldı <span class="heart-beat">💗</span></div></section>';
   }
   function stepper(field, v) {
     return '<div class="stepper"><button data-act="step" data-f="' + field + '" data-d="-1">−</button><div class="val">' + v + '<small> gün</small></div><button data-act="step" data-f="' + field + '" data-d="1">+</button></div>';
@@ -903,13 +923,26 @@
   var ob = null;
   function startOnboarding() {
     var p = parts(todayDn());
-    ob = { step: 0, dir: 1, name: S.name || 'Derya', sel: null, v: { y: p.y, m: p.m }, cycle: S.cycleLen, period: S.periodLen };
+    ob = { step: NEEDS_INSTALL ? -1 : 0, dir: 1, name: S.name || 'Derya', sel: null, v: { y: p.y, m: p.m }, cycle: S.cycleLen, period: S.periodLen };
     $('#onboard').hidden = false; $('#onboard').classList.remove('leave');
     renderOnboard();
   }
   function renderOnboard() {
     var o = $('#onboard'), t = todayDn(), h = '<div class="dots">' + [0, 1, 2].map(function (i) { return '<i class="' + (i === ob.step ? 'on' : '') + '"></i>'; }).join('') + '</div>';
     h += '<div class="step ' + (ob.dir < 0 ? 'back' : ob.dir === 0 ? 'still' : '') + '">';
+    if (ob.step === -1) {
+      h = '<div class="step">' +
+        '<div class="hero">' + LOGO + '</div>' +
+        '<h2>Önce iPhone\'una ekleyelim 📲</h2><p class="lead">Böylece ana ekranda ikonu olur, tam ekran ve internetsiz çalışır.</p>' +
+        '<div class="card install-steps">' +
+        '<div class="ist" style="--i:0"><span class="num">1</span><div>Safari\'de <b>Paylaş</b> <span class="share-ic">' + SHARE_ICON + '</span> düğmesine dokun<small>Göremiyorsan önce alttaki <b>•••</b> menüsüne dokun</small></div></div>' +
+        '<div class="ist" style="--i:1"><span class="num">2</span><div><b>“Ana Ekrana Ekle”</b>yi seç<small>Listede yoksa biraz aşağı kaydır</small></div></div>' +
+        '<div class="ist" style="--i:2"><span class="num">3</span><div><b>Ekle</b>\'ye dokun, sonra ana ekrandaki <b>Derya 🌸</b> ikonundan aç</div></div>' +
+        '</div><div class="grow"></div><div class="point-down">👇</div>' +
+        '<div class="actions"><button class="btn btn-ghost btn-block" data-act="obInstallSkip">Şimdilik Safari\'de devam et</button></div>';
+      o.innerHTML = h + '</div>';
+      return;
+    }
     if (ob.step === 0) {
       h += '<div class="hero">' + LOGO + '</div>' +
         '<h2>Hoş geldin! 🌸</h2><p class="lead">Sana özel, sevgiyle hazırlanmış regl takvimin. Önce birkaç küçük soru 💕</p>' +
@@ -1043,8 +1076,12 @@
     },
     export: function () {
       var txt = exportText();
-      if (NATIVE) { try { Android.share(txt); } catch (e) {} }
-      else if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { toast('Yedek panoya kopyalandı 📋'); });
+      if (NATIVE) { try { Android.share(txt); } catch (e) {} return; }
+      var copy = function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { toast('Yedek panoya kopyalandı 📋 Notlar\'a yapıştırıp sakla'); }, function () { toast('Kopyalanamadı 😕'); });
+      };
+      if (navigator.share) navigator.share({ title: 'Derya takvim yedeği', text: txt }).catch(function (e) { if (!e || e.name !== 'AbortError') copy(); });
+      else copy();
     },
     import: function () { openImport(); },
     doImport: function () { doImport(); },
@@ -1055,6 +1092,8 @@
         showTab('home', false); startOnboarding();
       });
     },
+    hideInstall: function (el) { S.hideInstall = true; save(); var c = el.closest('.card'); if (c) c.remove(); },
+    obInstallSkip: function () { ob.step = 0; ob.dir = 1; renderOnboard(); },
     modalYes: function () { closeModal(true); },
     modalNo: function () { closeModal(false); },
     obNext: function () {
@@ -1114,6 +1153,10 @@
 
   // ================= Açılış =================
   function boot() {
+    if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    }
+    if (!NATIVE && navigator.storage && navigator.storage.persist) { try { navigator.storage.persist().catch(function () {}); } catch (e) {} }
     document.body.className = 'theme-' + S.theme;
     setBars();
     if (tickOngoing()) save(); else syncReminders();

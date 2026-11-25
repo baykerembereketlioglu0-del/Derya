@@ -1,10 +1,26 @@
-# Derya 🌸 — Regl Takvimi (Android)
+# Derya 🌸 — Regl Takvimi (iPhone & Android)
 
 Animasyonlu, 5 farklı temalı, Türkçe bir regl (adet) takip uygulaması. Sevgiyle hazırlandı 💗
 
-![Önizleme](docs/onizleme.png)
+![Önizleme](docs/readme/onizleme.png)
 
-## 📲 Telefona yükleme
+## 🍎 iPhone'a yükleme
+
+iPhone'a APK kurulmaz; uygulama iPhone'da **web uygulaması** olarak çalışır (aynı arayüz):
+
+1. iPhone'da **Safari** ile şu adresi aç: **https://baykerembereketlioglu0-del.github.io/Derya/**
+2. **Paylaş** düğmesine (kare içinde yukarı ok) dokun → **"Ana Ekrana Ekle"** → **Ekle**.
+3. Bundan sonra uygulamayı hep ana ekrandaki **Derya 🌸** ikonundan aç
+   (Safari sekmesindeki kayıtlar ile ana ekran uygulamasının kayıtları ayrı tutulur).
+
+İlk açılıştan sonra internetsiz de çalışır; veriler sadece telefonda saklanır.
+iPhone'da zamanlanmış bildirim yok; regl yaklaşınca ana sayfada uyarı çıkar.
+
+> Site yayında değilse: GitHub'da repo → **Settings → Pages** → *Build and deployment* altında
+> **Source: Deploy from a branch**, **Branch: `ccr-1673116a-uuvdga`**, klasör **`/docs`** → **Save**.
+> 1–2 dakika sonra adres açılır.
+
+## 🤖 Android'e yükleme
 
 1. **[apk/Derya-Regl-Takvimi.apk](apk/Derya-Regl-Takvimi.apk)** dosyasını telefona indir
    (GitHub'da dosyayı açıp **"Download raw file"** / indir düğmesine bas).
@@ -46,7 +62,7 @@ sudo apt install openjdk-17-jdk aapt zipalign apksigner dalvik-exchange android-
 ./build.sh          # → apk/Derya-Regl-Takvimi.apk
 ```
 
-- Arayüz: `app/assets/www/` (HTML/CSS/JS). Tarayıcıda `index.html` açılarak da denenebilir.
+- Arayüz: `docs/` (HTML/CSS/JS). Hem APK'nın içine konur hem de iPhone için GitHub Pages'ten yayınlanır.
 - Android kısmı: `app/java/com/derya/takvim/` (WebView, bildirimler, veri saklama).
 - İkonlar: `node tools/make-icons.js` (Playwright ile SVG'den çizilir).
 - **İmza anahtarı** (`keystore/derya.keystore`) güvenlik için repoda tutulmaz. Güncellemeyi

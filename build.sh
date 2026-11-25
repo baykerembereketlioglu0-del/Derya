@@ -21,7 +21,9 @@ done
 [ -f "$ANDROID_JAR" ] || { echo "android.jar bulunamadı: $ANDROID_JAR"; exit 1; }
 
 rm -rf "$OUT"
-mkdir -p "$OUT/gen" "$OUT/classes" "$OUT/dex" apk keystore
+mkdir -p "$OUT/gen" "$OUT/classes" "$OUT/dex" "$OUT/assets/www" apk keystore
+# Arayüz docs/ klasöründe (aynı dosyalar iPhone için GitHub Pages'ten de yayınlanıyor)
+cp docs/index.html docs/app.js docs/style.css docs/fonts.css "$OUT/assets/www/"
 
 echo "1/6 Kaynaklar (R.java)…"
 aapt package -f -m -J "$OUT/gen" -M app/AndroidManifest.xml -S app/res -I "$ANDROID_JAR"
@@ -34,7 +36,7 @@ echo "3/6 DEX…"
 dalvik-exchange --dex --min-sdk-version=24 --output="$OUT/dex/classes.dex" "$OUT/classes"
 
 echo "4/6 Paketleniyor…"
-aapt package -f -M app/AndroidManifest.xml -S app/res -A app/assets -I "$ANDROID_JAR" \
+aapt package -f -M app/AndroidManifest.xml -S app/res -A "$OUT/assets" -I "$ANDROID_JAR" \
   -F "$OUT/unsigned.apk"
 (cd "$OUT/dex" && aapt add ../unsigned.apk classes.dex >/dev/null)
 zipalign -f -p 4 "$OUT/unsigned.apk" "$OUT/aligned.apk"

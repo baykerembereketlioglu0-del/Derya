@@ -71,8 +71,15 @@ const densities = { mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 };
     await render(svg('0 0 108 108', background, 108 * k), 108 * k, path.join(dir, 'ic_launcher_bg.png'));
     await render(svg('0 0 108 108', foreground, 108 * k), 108 * k, path.join(dir, 'ic_launcher_fg.png'));
   }
-  // README / önizleme için büyük ikon
-  await render(legacy(512), 512, path.join(__dirname, '..', 'docs', 'icon.png'));
+  // README için büyük ikon
+  const DOCS = path.join(__dirname, '..', 'docs');
+  await render(legacy(512), 512, path.join(DOCS, 'readme', 'icon.png'));
+  // iPhone / web uygulaması ikonları (köşeleri sistem yuvarlar, o yüzden tam kare)
+  const square = (size) => svg('18 18 72 72', background + foreground, size);
+  await render(square(180), 180, path.join(DOCS, 'icons', 'apple-touch-icon.png'));
+  await render(square(192), 192, path.join(DOCS, 'icons', 'icon-192.png'));
+  await render(square(512), 512, path.join(DOCS, 'icons', 'icon-512.png'));
+  await render(svg('0 0 108 108', background + foreground, 512), 512, path.join(DOCS, 'icons', 'icon-maskable-512.png'));
   await browser.close();
   console.log('ikonlar hazır');
 })();
