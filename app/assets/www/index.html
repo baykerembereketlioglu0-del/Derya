@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Derya 🌸</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-pembe">
+<script>
+  // Seçili temayı ilk çizimden önce uygula (beyaz/pembe parlama olmasın).
+  (function () {
+    try {
+      var s = window.Android ? Android.load() : localStorage.getItem('derya-data');
+      var t = s && JSON.parse(s).theme;
+      if (t) document.body.className = 'theme-' + t;
+    } catch (e) {}
+  })();
+</script>
+
+<div id="bg" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div id="particles"></div>
+</div>
+
+<div id="splash">
+  <div class="splash-logo">
+    <span class="ripple"></span><span class="ripple r2"></span>
+    <svg class="logo" viewBox="0 0 108 108" aria-hidden="true">
+      <defs>
+        <linearGradient id="sp-drop" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style="stop-color:var(--primary2)"/>
+          <stop offset="1" style="stop-color:var(--primary)"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#sp-drop)" d="M54,14C54,14 26,45 26,64C26,79.5 38.5,92 54,92C69.5,92 82,79.5 82,64C82,45 54,14 54,14Z"/>
+      <path class="heart" fill="#fff" d="M54,80C54,80 39,70.5 39,60.4C39,55.4 42.8,51.8 47.1,51.8C50.2,51.8 52.6,53.5 54,55.9C55.4,53.5 57.8,51.8 60.9,51.8C65.2,51.8 69,55.4 69,60.4C69,70.5 54,80 54,80Z"/>
+      <ellipse cx="41" cy="46" rx="4" ry="7" fill="#fff" fill-opacity=".55" transform="rotate(30 41 46)"/>
+    </svg>
+  </div>
+  <div class="splash-text" id="splashText">Merhaba 💕</div>
+  <div class="splash-sub">regl takvimin hazırlanıyor…</div>
+</div>
+
+<div id="onboard" hidden></div>
+
+<main id="app">
+  <section class="page" id="page-home"></section>
+  <section class="page" id="page-cal"></section>
+  <section class="page" id="page-stats"></section>
+  <section class="page" id="page-settings"></section>
+</main>
+
+<nav id="tabbar">
+  <span class="ind"></span>
+  <button class="tab active" data-tab="home">
+    <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.3-9.6C1.5 8 3.6 4.5 7.2 4.5c2 0 3.5 1.1 4.8 2.8 1.3-1.7 2.8-2.8 4.8-2.8 3.6 0 5.7 3.5 4.5 6.9C19.5 16.4 12 21 12 21z" fill="currentColor"/></svg>
+    <span>Bugün</span>
+  </button>
+  <button class="tab" data-tab="cal">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 3v4M16 3v4M3 10h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15.5" r="2.2" fill="currentColor"/></svg>
+    <span>Takvim</span>
+  </button>
+  <button class="tab" data-tab="stats">
+    <svg viewBox="0 0 24 24"><path d="M5 20V12M12 20V5M19 20v-6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+    <span>Analiz</span>
+  </button>
+  <button class="tab" data-tab="settings">
+    <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4-2-1.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    <span>Ayarlar</span>
+  </button>
+</nav>
+
+<div id="backdrop"></div>
+<div id="sheet" role="dialog" aria-modal="true"></div>
+<div id="modal"><div class="modal-box"></div></div>
+<div id="toast"></div>
+<div id="fx" aria-hidden="true"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
